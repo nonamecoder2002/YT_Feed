@@ -17,18 +17,6 @@ channel_pool = [
     {'id': 'UCspfe9lef7ApJaHQsOcPC1A', 'name': 'overbafer1'}
 ]
 
-# channel_name_pool = []
-# def get_id(name: str):
-#     request = youtube.channels().list(
-#         part='id',
-#         forUsername=name
-#     )
-#     return request.execute()
-#
-#
-# for name in channel_name_pool:
-#     print(get_id(name=name)['items'][0]['id'], '\n')
-
 
 def search_latest(channel_id: str):
     request = youtube.search().list(
