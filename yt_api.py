@@ -19,6 +19,12 @@ channel_pool = [
 
 
 def search_latest(channel_id: str):
+    """
+    Searches for the latest video on specified channel
+
+    :param channel_id: string
+    :return: dict obj.
+    """
     request = youtube.search().list(
         part='snippet',
         channelId=channel_id,
@@ -29,13 +35,25 @@ def search_latest(channel_id: str):
 
 
 def video_link(item: dict):
+    """
+    Creates web-link to the specified video
+
+    :param item: dict
+    :return: link: string
+    """
     link = 'https://www.youtube.com/watch?v=' + item['id']['videoId']
     return link
 
 
 def parse_snippet(snippet: dict):
+    """
+    Parses snippet into a dict of information about certain video
+
+
+    :param snippet: dict
+    :return: parse_result -> dict obj.
+    """
     parse_result = {
-        # 'published': snippet['publishedAt'],
         'title': snippet['title'],
         'description': snippet['description'],
         'preview': snippet['thumbnails']['high']['url'],
