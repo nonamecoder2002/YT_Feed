@@ -19,8 +19,8 @@ def build_service(keys: list):
 channel_pool = [
     # {'id': 'UCGBFIBxDuaEmrL5CxXSxx6g', 'name': 'СТАС'},
     # {'id': 'UCptRK95GEDXvJGOQIFg50fg', 'name': 'Игорь Линк'},
-    # {'id': 'UC9MK8SybZcrHR3CUV4NMy2g', 'name': 'Диджитализируй!'},
-    # {'id': 'UCPIKvg4P2pRDdmyN1gi9bnA', 'name': 'MovieMaker'},
+    {'id': 'UC9MK8SybZcrHR3CUV4NMy2g', 'name': 'Диджитализируй!'},
+    {'id': 'UCPIKvg4P2pRDdmyN1gi9bnA', 'name': 'MovieMaker'},
     {'id': 'UCg0bIYJXvberMBRdO1k1Dxg', 'name': 'Izzy ᴸᴬᴵᶠ'},
     # {'id': 'UC1qWaT8_iPHSBYgB4T2ltuA', 'name': 'Ай, Как Просто!'},
     # {'id': 'UCCezIgC97PvUuR4_gbFUs5g', 'name': 'Corey Schafer'},
@@ -62,6 +62,15 @@ def parse_response_item(response_item_: dict):
         'video_preview': item_snippet['thumbnails']['high']['url']
     }
     return parse_result
+
+
+def pool_compare(entity: dict, pool: list):
+    for pool_entity in pool:
+        if entity['yt_id'][-1:-6:-1] == pool_entity['yt_id'][-1:-6:-1]:
+            if entity['video_id'][-1:-6:-1] == pool_entity['video_id'][-1:-6:-1]:
+                return True
+            else:
+                return False
 
 
 for channel in channel_pool:
