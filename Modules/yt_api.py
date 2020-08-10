@@ -1,4 +1,3 @@
-# import asyncio
 
 from googleapiclient.discovery import build
 from Modules.Classes import KeyExpired
@@ -41,7 +40,11 @@ def get_video_details(api_keys_: list, video_id: str):
     return response
 
 
-# items[0][snippet][channelTitle], items[0][id][videoId]
+def compare(old_pool: list, new_pool: list, output_pool: list):
+    for i in range(len(old_pool)):
+        if old_pool[i]['videoId'] != new_pool[i]['videoId']:
+            output_pool.append(new_pool[i])
+
 
 def make_message_content(response_item_: dict):
     item_snippet = response_item_['snippet']
@@ -54,27 +57,3 @@ def make_message_content(response_item_: dict):
         'video_preview': item_snippet['thumbnails']['maxres']['url']
     }
     return parse_result
-
-
-# async def update_video_pool(entity: dict, pool: list, latest_pool_: list):
-#     for pool_entity in pool:
-#         if entity['channelTitle'] == pool_entity['channelTitle']:
-#             if entity['videoId'][-1:-4:-1] != pool_entity['videoId'][-1:-4:-1]:
-#                 pool.remove(pool_entity)
-#                 pool.append(entity)
-#                 latest_pool_.append(entity)
-#                 return None
-
-
-# for channel in channel_pool:
-#     response_item = make_pool(channel_id=channel['id'])['items'][0]
-#     video_dict = parse_response_item(response_item_=response_item)
-#     dict_entity = dict(yt_name=channel['name'], video_id=video_dict['video_id'])
-#     video_pool.append(dict_entity)
-#     print(
-#         channel['name'], '\n\t',
-#         video_dict['video_title'], '\n',
-#         video_dict['video_preview'], '\n\n',
-#         video_dict['video_url'], '\n',
-#     )
-#     print('\n\n', video_pool)
