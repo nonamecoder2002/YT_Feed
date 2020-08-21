@@ -16,12 +16,12 @@ class Key:
         if self.activation_date.day != datetime.now().day:
             self.points = 1000
 
-        if self.points <= 100:
+        if self.points <= 5:
             self.valid = False
             return None
 
         else:
-            self.points = self.points - 100
+            self.points = self.points - 2
 
     def is_valid(self):
         return self.valid

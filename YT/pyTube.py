@@ -1,7 +1,5 @@
 from pytube import YouTube
 
-# yt_object = YouTube('https://www.youtube.com/watch?v=' + vid_id)
-
 
 def get_vid_url(vid_id: str):
     download_url = YouTube(url='https://www.youtube.com/watch?v=' + vid_id).streams.filter(

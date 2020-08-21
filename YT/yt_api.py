@@ -1,7 +1,4 @@
-
 from googleapiclient.discovery import build
-
-from YT.Classes import KeyExpired
 
 
 def build_service(keys: list):
@@ -11,20 +8,25 @@ def build_service(keys: list):
             return build(serviceName='youtube', version='v3', developerKey=key.key_value)
 
 
-def make_video_pool(channel_pool_: list, video_pool_: list, api_keys: list):
-    youtube = build_service(keys=api_keys)
-    if youtube is None:
-        raise KeyExpired
-    else:
-        for channel in channel_pool_:
-            request = youtube.search().list(
-                part='snippet',
-                channelId=channel['channelId'],
-                order='date',
-                maxResults=1
-            )
-            response = request.execute()['items'][0]
-            video_pool_.append(response['id']['videoId'])
+def latest_vid_id(channel_id: str, keys: list):
+    service = build_service(keys=keys)
+    request = service.channels().list(
+        part="contentDetails",
+        id=channel_id,
+        maxResults=1
+    )
+
+    playlist_id = request.execute()['items'][0]['contentDetails']['relatedPlaylists']['uploads']
+
+    request2 = service.playlistItems().list(
+        part="contentDetails",
+        playlistId=playlist_id,
+        maxResults=1
+    )
+
+    lat_vid_id = request2.execute()['items'][0]['contentDetails']['videoId']
+
+    return lat_vid_id
 
 
 def compare(old_pool: list, new_pool: list, output_pool: list):
