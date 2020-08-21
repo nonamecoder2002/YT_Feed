@@ -1,12 +1,15 @@
 import asyncio
 
-from Modules.Classes import Key
+from YT.Classes import Key
 
-from Modules.yt_api import (
+from YT.yt_api import (
     make_video_pool,
-    compare,
-    get_video_details,
-    make_message_content
+    compare
+)
+from YT.pyTube import (
+    get_vid_url,
+    get_vid_thumbnail,
+    get_vid_info
 )
 
 api_keys = [
@@ -25,40 +28,32 @@ channel_pool = [
     # {'channelId': 'UCq7JZ8ATgQWeu6sDM1czjhg', 'channelTitle': 'StopGame.Ru'},
     # {'channelId': 'UC9DXAsBD4-ITVuvpd68401Q', 'channelTitle': 'AutoTopNL'},
     # {'channelId': 'UCspfe9lef7ApJaHQsOcPC1A', 'channelTitle': 'overbafer1'},
-    {'channelId': 'UCEC4D0dTTJr_EEnEJz15hnQ', 'channelTitle': '24 Канал'}
+    # {'channelId': 'UCEC4D0dTTJr_EEnEJz15hnQ', 'channelTitle': '24 Канал'},
+    {'channelId': 'UCrp_UI8XtuYfpiqluWLD7Lw', 'channelTitle': 'CNBCtelevision'},
 ]
 
 perm_video_pool = [
 
 ]
 
-latest_pool = [
-
-]
 make_video_pool(channel_pool_=channel_pool, video_pool_=perm_video_pool, api_keys=api_keys)
 
 
 async def main():
-    print('--------------------------')
     while True:
-        await asyncio.sleep(delay=300)
-        global latest_pool, perm_video_pool
-        temp_video_pool = []
+        global perm_video_pool
+        temp_video_pool, latest_video_pool = [], []
         make_video_pool(channel_pool_=channel_pool, video_pool_=temp_video_pool, api_keys=api_keys)
-        print('Temp pool: ', temp_video_pool)
-        compare(old_pool=perm_video_pool, new_pool=temp_video_pool, output_pool=latest_pool)
-        if latest_pool:
-            perm_video_pool = temp_video_pool
-            for video in latest_pool:
-                video_details = get_video_details(api_keys_=api_keys, video_id=video['videoId'])
-                print(make_message_content(response_item_=video_details), '\n')
-        latest_pool = []
-        print('--------------------------')
-
+        compare(old_pool=perm_video_pool, new_pool=temp_video_pool, output_pool=latest_video_pool)
+        perm_video_pool = temp_video_pool
+        for video_id in latest_video_pool:
+            video = get_vid_url(vid_id=video_id)
+            preview = get_vid_thumbnail(vid_id=video_id)
+            description = get_vid_info(vid_id=video_id)
+            print('Got New video {} \n {}\n {}'.format(video, preview, description))
+        print('***************')
+        await asyncio.sleep(delay=150)
 
 if __name__ == '__main__':
     loop = asyncio.get_event_loop()
-    task = [
-        loop.create_task(main()),
-            ]
-    loop.run_until_complete(asyncio.wait(task))
+    loop.run_until_complete(main())
