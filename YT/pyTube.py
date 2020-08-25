@@ -1,20 +1,21 @@
 from pytube import YouTube
 
 
-def get_vid_url(vid_id: str):
-    download_url = YouTube(url='https://www.youtube.com/watch?v=' + vid_id).streams.filter(
+def get_vid_data(v_id: str):
+    yt = YouTube(url='https://www.youtube.com/watch?v=' + v_id)
+    v_url = yt.streams.filter(
         fps=30,
         resolution='720p',
         file_extension='mp4',
         progressive=True
     ).first().url
-    return download_url
-
-
-def get_vid_info(vid_id: str):
-    vid_obj = YouTube(url='https://www.youtube.com/watch?v=' + vid_id)
     return {
-        'author': vid_obj.author,
-        'title': vid_obj.title,
-        'views': vid_obj.views,
+        'v_url': v_url,
+        'author': yt.author,
+        'title': yt.title,
+        'thumbnail_url': yt.thumbnail_url,
+        'desc': yt.description.split('\n')[0]
     }
+
+
+# print(get_vid_data('PJiaw2AnhsU'))
