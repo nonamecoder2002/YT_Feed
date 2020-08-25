@@ -11,16 +11,10 @@ def get_vid_url(vid_id: str):
     return download_url
 
 
-def get_vid_thumbnail(vid_id: str):
-    return YouTube(url='https://www.youtube.com/watch?v=' + vid_id).thumbnail_url
-
-
 def get_vid_info(vid_id: str):
     vid_obj = YouTube(url='https://www.youtube.com/watch?v=' + vid_id)
     return {
         'author': vid_obj.author,
         'title': vid_obj.title,
         'views': vid_obj.views,
-        'description': vid_obj.description,
-
     }
