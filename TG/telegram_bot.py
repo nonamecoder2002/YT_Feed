@@ -51,16 +51,17 @@ def vid_feed(context: CallbackContext):
     print(temp_pool)
     for video_id in latest_v_pool:
         print('Sending: ', video_id)
-        video_data = get_vid_data(v_id=video_id)
-        v_url = video_data['v_url']
-        r = requests.get(v_url)
-        video = io.BytesIO(r.content)
+        v_data = get_vid_data(v_id=video_id)
+        thumb = requests.get(v_data['thumbnail_url']).content
+        video = io.BytesIO(requests.get(v_data['v_url']).content)
+        caption = v_data['title'] + '\n\n' + v_data['desc']
         context.bot.send_video(
             chat_id='399835396',
             video=video,
+            thumb=thumb,
+            caption=caption,
             supports_streaming=True
         )
-
     perm_video_pool = temp_pool
 
 
@@ -73,6 +74,7 @@ def main():
     job = updater.job_queue
 
     job.run_repeating(vid_feed, interval=120, first=0)
+
     _dispatcher = updater.dispatcher
 
     updater.start_polling()

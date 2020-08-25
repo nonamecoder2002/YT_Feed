@@ -14,8 +14,5 @@ def get_vid_data(v_id: str):
         'author': yt.author,
         'title': yt.title,
         'thumbnail_url': yt.thumbnail_url,
-        'desc': yt.description.split('\n')[0]
+        'desc': '\n'.join(yt.description.split('\n')[:3])
     }
-
-
-# print(get_vid_data('PJiaw2AnhsU'))
