@@ -1,17 +1,21 @@
 from telegram.ext import Updater, CallbackContext
 
-import requests, datetime
+import datetime
 
 from YT.yt_api import (
     locator,
     latest_vid_id
 )
 
+
 from YT.Classes import Key
 
-from YT.pyTube import get_vid_data
+from YT.pyTube import (
+    downloader,
+    get_vid_data
+)
 
-import io
+from io import BytesIO
 
 api_keys = [
     Key(value='AIzaSyBTZ9drxqXKkh8yijdYaBQS1ijANQQApZQ'),
@@ -33,6 +37,7 @@ channel_pool = [
 
 perm_video_pool = []
 
+
 for channel in channel_pool:
     latest_v_id = latest_vid_id(channel_id=channel['channelId'], keys=api_keys)
     perm_video_pool.append(latest_v_id)
@@ -50,18 +55,21 @@ def vid_feed(context: CallbackContext):
     temp_pool = located[1]
     print(temp_pool)
     for video_id in latest_v_pool:
+        stream = BytesIO()
         print('Sending: ', video_id)
         v_data = get_vid_data(v_id=video_id)
-        thumb = requests.get(v_data['thumbnail_url']).content
-        video = io.BytesIO(requests.get(v_data['v_url']).content)
+        downloader(i_stream=stream, v_url=v_data['v_url'])
+        stream.seek(0)
         caption = v_data['title'] + '\n\n' + v_data['desc']
         context.bot.send_video(
             chat_id='399835396',
-            video=video,
-            thumb=thumb,
+            video=stream,
             caption=caption,
+            height=720,
+            width=1280,
             supports_streaming=True
         )
+        stream.close()
     perm_video_pool = temp_pool
 
 
