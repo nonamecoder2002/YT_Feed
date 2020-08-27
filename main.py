@@ -78,7 +78,7 @@ def main():
                       )
     job = updater.job_queue
 
-    job.run_repeating(vid_feed, interval=120, first=0)
+    job.run_repeating(vid_feed, interval=180, first=0)
 
     _dispatcher = updater.dispatcher
 
