@@ -1,21 +1,29 @@
-from telegram.ext import Updater, CallbackContext
+import logging
 
-import datetime
+from telegram.ext import Updater, CallbackContext, CommandHandler
+
+from TG.ptb_funcs import send_video
 
 from YT.yt_api import (
     locator,
     latest_vid_id
 )
 
-
 from YT.Classes import Key
 
-from YT.pyTube import (
-    downloader,
-    get_vid_data
-)
 
-from io import BytesIO
+logger = logging.getLogger(__name__)
+
+logger.setLevel(logging.INFO)
+
+formatter = logging.Formatter('%(levelname)s-->%(asctime)s:%(name)s:%(message)s')
+
+file_handler = logging.FileHandler('logs.log', mode='w')
+
+file_handler.setFormatter(formatter)
+
+logger.addHandler(file_handler)
+
 
 api_keys = [
     Key(value='AIzaSyBTZ9drxqXKkh8yijdYaBQS1ijANQQApZQ'),
@@ -45,32 +53,24 @@ for channel in channel_pool:
 
 def vid_feed(context: CallbackContext):
     global perm_video_pool
-    print(datetime.datetime.now())
     located = locator(
         channel_pool=channel_pool,
         perm_video_pool=perm_video_pool,
         api_keys=api_keys
     )
-    latest_v_pool = located[0]
-    temp_pool = located[1]
-    print(temp_pool)
+    latest_v_pool, temp_pool = located
+    logger.info(f'Temporary vid pool: {temp_pool}')
     for video_id in latest_v_pool:
-        stream = BytesIO()
-        print('Sending: ', video_id)
-        v_data = get_vid_data(v_id=video_id)
-        downloader(i_stream=stream, v_url=v_data['v_url'])
-        stream.seek(0)
-        caption = v_data['title'] + '\n\n' + v_data['desc']
-        context.bot.send_video(
-            chat_id='399835396',
-            video=stream,
-            caption=caption,
-            height=720,
-            width=1280,
-            supports_streaming=True
-        )
-        stream.close()
+        logger.info(f'Sending video: {video_id}')
+        send_video(context=context, v_id=video_id)
     perm_video_pool = temp_pool
+
+
+def send_logs(update, context):
+    if update.effective_user.id == 399835396:
+        update.message.reply_document(
+           open('logs.log', 'rb')
+        )
 
 
 def main():
@@ -84,6 +84,8 @@ def main():
     job.run_repeating(vid_feed, interval=120, first=0)
 
     _dispatcher = updater.dispatcher
+
+    _dispatcher.add_handler(CommandHandler('logs', send_logs))
 
     updater.start_polling()
 
