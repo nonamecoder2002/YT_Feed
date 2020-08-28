@@ -56,10 +56,10 @@ def vid_feed(context: CallbackContext):
         api_keys=api_keys
     )
     latest_v_pool, temp_pool = located
-    logger.info(f'Temporary vid pool: {temp_pool}')
     for video_id in latest_v_pool:
         logger.info(f'Sending video: {video_id}')
         send_video(context=context, v_id=video_id)
+        logger.info(f'Video {video_id} sent!!')
     perm_video_pool = temp_pool
 
 
