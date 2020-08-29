@@ -132,7 +132,7 @@ def main():
 
     updater.idle()
 
-    logger.debug('Bot is Up')
+    logger.info('Bot is Up')
 
 
 if __name__ == '__main__':
