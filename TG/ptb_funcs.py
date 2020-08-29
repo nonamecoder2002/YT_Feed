@@ -20,7 +20,7 @@ def write_to_stream(i_stream, v_url):
         max_size = max_size - chunk_sz
 
 
-def send_video(context, v_id: str):
+def send_video(context, v_id: str, markup):
     stream = BytesIO()
     v_data = get_vid_data(v_id=v_id)
     write_to_stream(i_stream=stream, v_url=v_data['v_url'])
@@ -32,5 +32,6 @@ def send_video(context, v_id: str):
         caption=caption,
         supports_streaming=True,
         parse_mode='HTML',
+        reply_markup=markup
     )
     stream.close()
