@@ -1,5 +1,7 @@
 import logging
 
+from datetime import datetime
+
 from telegram import (
     InlineKeyboardMarkup,
     InlineKeyboardButton
@@ -21,14 +23,13 @@ from YT.yt_api import (
 
 from YT.Classes import Key
 
-
 logger = logging.getLogger(__name__)
 
 logger.setLevel(logging.INFO)
 
 formatter = logging.Formatter('%(levelname)s-->%(asctime)s:%(name)s:%(message)s')
 
-file_handler = logging.FileHandler('logs.log', mode='w')
+file_handler = logging.FileHandler('logs.txt', mode='w')
 
 file_handler.setFormatter(formatter)
 
@@ -52,6 +53,9 @@ channel_pool = [
 
 perm_video_pool = []
 
+sent_v_pool = []
+
+clean_t = datetime(year=2020, month=12, day=12, hour=0, minute=0, second=0)
 
 for channel in channel_pool:
 
@@ -61,7 +65,7 @@ for channel in channel_pool:
 
 def vid_feed(context: CallbackContext):
 
-    global perm_video_pool
+    global perm_video_pool, sent_v_pool
     keyboard = [
         [InlineKeyboardButton(text='❌ Delete', callback_data='del')]
     ]
@@ -73,9 +77,11 @@ def vid_feed(context: CallbackContext):
     )
     latest_v_pool, temp_pool = located
     for video_id in latest_v_pool:
-        logger.info(f'Fetched video: {video_id}')
-        send_video(context=context, v_id=video_id, markup=markup)
-        logger.info(f'Video {video_id} sent!!')
+        if video_id not in sent_v_pool:
+            logger.info(f'Fetched Video: {video_id}')
+            send_video(context=context, v_id=video_id, markup=markup)
+            logger.info(f'Sent Video {video_id}')
+            sent_v_pool.append(video_id)
     perm_video_pool = temp_pool
 
 
@@ -83,11 +89,11 @@ def send_logs(update, context):
 
     if update.effective_user.id == 399835396:
         update.message.reply_document(
-           open('logs.log', 'rb')
+           open('logs.txt', 'rb')
         )
 
 
-def callback(update, context):
+def call_handler(update, context):
 
     call = update.callback_query
     if call.data == 'del':
@@ -98,6 +104,12 @@ def callback(update, context):
         )
 
 
+def pool_cleaner(context: CallbackContext):
+
+    global sent_v_pool
+    sent_v_pool = []
+
+
 def main():
 
     updater = Updater(
@@ -106,17 +118,21 @@ def main():
                       )
     job = updater.job_queue
 
-    job.run_repeating(vid_feed, interval=180, first=0)
+    job.run_repeating(callback=vid_feed, interval=180, first=0)
+
+    job.run_daily(callback=pool_cleaner, time=clean_t)
 
     _dispatcher = updater.dispatcher
 
     _dispatcher.add_handler(CommandHandler('logs', send_logs))
 
-    _dispatcher.add_handler(CallbackQueryHandler(callback=callback))
+    _dispatcher.add_handler(CallbackQueryHandler(callback=call_handler))
 
     updater.start_polling()
 
     updater.idle()
+
+    logger.debug('Bot is Up')
 
 
 if __name__ == '__main__':
