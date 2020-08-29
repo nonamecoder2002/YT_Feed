@@ -101,7 +101,7 @@ def callback(update, context):
 def main():
 
     updater = Updater(
-        token=  '1195479317:AAEmNp4sVdLKleamZhKc_z3GqEba4HYa7pA',#'1254645903:AAGK9Lud_wRONgINQMm6xgeroQmA89zSC5I',
+        token='1254645903:AAGK9Lud_wRONgINQMm6xgeroQmA89zSC5I',
         use_context=True
                       )
     job = updater.job_queue
