@@ -55,7 +55,7 @@ perm_video_pool = []
 
 sent_v_pool = []
 
-clean_t = datetime(year=2020, month=12, day=12, hour=0, minute=0, second=0)
+clean_t = datetime(year=2020, month=12, day=12, hour=0, minute=0, second=0).time()
 
 for channel in channel_pool:
 
@@ -107,6 +107,7 @@ def call_handler(update, context):
 def pool_cleaner(context: CallbackContext):
 
     global sent_v_pool
+    logger.info(f'Sent videos: {sent_v_pool}')
     sent_v_pool = []
 
 
@@ -130,9 +131,10 @@ def main():
 
     updater.start_polling()
 
+    logger.info('Bot is up')
+
     updater.idle()
 
-    logger.info('Bot is Up')
 
 
 if __name__ == '__main__':
