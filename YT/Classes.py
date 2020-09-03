@@ -9,7 +9,7 @@ logger.setLevel(logging.WARNING)
 
 formatter = logging.Formatter('%(levelname)s-->%(asctime)s:%(name)s:%(message)s')
 
-file_handler = logging.FileHandler('logs.log', mode='a')
+file_handler = logging.FileHandler('logs.txt', mode='a')
 
 file_handler.setFormatter(formatter)
 

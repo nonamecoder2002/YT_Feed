@@ -8,40 +8,46 @@ def build_service(keys: list):
             return build(serviceName='youtube', version='v3', developerKey=key.key_value)
 
 
-def latest_vid_id(channel_id: str, keys: list):
-    service = build_service(keys=keys)
+def get_playlist(_channel_id: str, _keys: list):
+
+    service = build_service(keys=_keys)
+
     request = service.channels().list(
         part="contentDetails",
-        id=channel_id,
+        id=_channel_id,
         maxResults=1
     )
 
-    playlist_id = request.execute()['items'][0]['contentDetails']['relatedPlaylists']['uploads']
+    return request.execute()['items'][0]['contentDetails']['relatedPlaylists']['uploads']
 
-    request2 = service.playlistItems().list(
+
+def fetch_uploads(channel_id: str, keys: list, out: list):
+
+    service = build_service(keys=keys)
+
+    uploads_pl = get_playlist(_channel_id=channel_id, _keys=keys)
+
+    request = service.playlistItems().list(
         part="contentDetails",
-        playlistId=playlist_id,
+        playlistId=uploads_pl,
+        maxResults=3
+    )
+
+    for item in request.execute()['items']:
+
+        out.append(item['contentDetails']['videoId'])
+
+
+def fetch_lat(channel_id: str, keys: list):
+
+    service = build_service(keys=keys)
+
+    uploads_pl = get_playlist(_channel_id=channel_id, _keys=keys)
+
+    request = service.playlistItems().list(
+        part="contentDetails",
+        playlistId=uploads_pl,
         maxResults=1
     )
 
-    lat_vid_id = request2.execute()['items'][0]['contentDetails']['videoId']
-
-    return lat_vid_id
-
-
-def compare(old_pool: list, new_pool: list, output_pool: list):
-    for i in range(len(old_pool)):
-        if old_pool[i] != new_pool[i]:
-            output_pool.append(new_pool[i])
-
-
-def locator(channel_pool: list, perm_video_pool: list, api_keys: list):
-    temp_video_pool, latest_video_pool = [], []
-    for _channel in channel_pool:
-        _latest_v_id = latest_vid_id(channel_id=_channel['channelId'], keys=api_keys)
-        temp_video_pool.append(_latest_v_id)
-    compare(old_pool=perm_video_pool, new_pool=temp_video_pool, output_pool=latest_video_pool)
-    return [
-        latest_video_pool,
-        temp_video_pool
-    ]
+    return request.execute()['items'][0]['contentDetails']['videoId']

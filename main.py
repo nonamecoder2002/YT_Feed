@@ -7,7 +7,7 @@ from telegram import (
     InlineKeyboardButton
 )
 
-from telegram.ext import(
+from telegram.ext import (
     Updater,
     CallbackContext,
     CommandHandler,
@@ -17,8 +17,8 @@ from telegram.ext import(
 from TG.ptb_funcs import send_video
 
 from YT.yt_api import (
-    locator,
-    latest_vid_id
+    fetch_uploads,
+    fetch_lat
 )
 
 from YT.Classes import Key
@@ -51,38 +51,39 @@ channel_pool = [
 
 ]
 
-perm_video_pool = []
-
-sent_v_pool = []
+uploads = []
 
 clean_t = datetime(year=2020, month=12, day=12, hour=0, minute=0, second=0).time()
 
+
 for channel in channel_pool:
 
-    latest_v_id = latest_vid_id(channel_id=channel['channelId'], keys=api_keys)
-    perm_video_pool.append(latest_v_id)
+    fetch_uploads(
+        channel_id=channel['channelId'],
+        keys=api_keys,
+        out=uploads
+    )
+
+logger.info(f'Fetched uploads: {uploads}')
 
 
 def vid_feed(context: CallbackContext):
 
-    global perm_video_pool, sent_v_pool
-    keyboard = [
-        [InlineKeyboardButton(text='❌ Delete', callback_data='del')]
-    ]
+    global uploads
+
+    keyboard = [[InlineKeyboardButton(text='❌ Delete', callback_data='del')]]
+
     markup = InlineKeyboardMarkup(keyboard)
-    located = locator(
-        channel_pool=channel_pool,
-        perm_video_pool=perm_video_pool,
-        api_keys=api_keys
-    )
-    latest_v_pool, temp_pool = located
-    for video_id in latest_v_pool:
-        if video_id not in sent_v_pool:
-            logger.info(f'Fetched Video: {video_id}')
-            send_video(context=context, v_id=video_id, markup=markup)
-            logger.info(f'Sent Video {video_id}')
-            sent_v_pool.append(video_id)
-    perm_video_pool = temp_pool
+
+    for _channel in channel_pool:
+        v_id = fetch_lat(channel_id=_channel['channelId'], keys=api_keys)
+
+        if v_id not in uploads:
+            logger.info(f'Fetched Video: {v_id}')
+            send_video(context=context, v_id=v_id, markup=markup)
+            logger.info(f'Sent Video {v_id}')
+
+            uploads.append(v_id)
 
 
 def send_logs(update, context):
@@ -104,11 +105,10 @@ def call_handler(update, context):
         )
 
 
-def pool_cleaner(context: CallbackContext):
+def clear_uploads(context: CallbackContext):
 
-    global sent_v_pool
-    logger.info(f'Sent videos: {sent_v_pool}')
-    sent_v_pool = []
+    global uploads
+    uploads.clear()
 
 
 def main():
@@ -121,7 +121,7 @@ def main():
 
     job.run_repeating(callback=vid_feed, interval=180, first=0)
 
-    job.run_daily(callback=pool_cleaner, time=clean_t)
+    job.run_daily(callback=clear_uploads, time=clean_t)
 
     _dispatcher = updater.dispatcher
 
@@ -134,7 +134,6 @@ def main():
     logger.info('Bot is up')
 
     updater.idle()
-
 
 
 if __name__ == '__main__':
