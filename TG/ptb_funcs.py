@@ -8,6 +8,15 @@ from YT.pyTube import (
 )
 
 
+def del_mes(_update, _context):
+    mes_id = _update.message.message_id
+    _context.bot.delete_message(
+        chat_id=399835396,
+        message_id=mes_id
+
+    )
+
+
 def write_to_stream(i_stream, v_url):
     max_size = 52000000
     chunk_sz = 2000

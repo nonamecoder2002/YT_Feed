@@ -7,7 +7,7 @@ logger = logging.getLogger(__name__)
 
 logger.setLevel(logging.ERROR)
 
-formatter = logging.Formatter('%(levelname)s-->%(asctime)s:%(name)s:%(message)s')
+formatter = logging.Formatter('%(levelname)s-->%(asctime)s: %(name)s: %(message)s')
 
 file_handler = logging.FileHandler('logs.txt', mode='a')
 
@@ -28,7 +28,7 @@ def get_vid_data(v_id: str):
         return {
             'v_url': v_url,
             'title': f'<b>{yt.title}</b>',
-            'desc': '\n'.join(yt.description.split('\n')[:3])[:100] + '...'
+            'desc': '\n'.join(yt.description.split('\n')[:3])[:200] + '...'
         }
     except Exception as exc:
         logger.exception(exc)

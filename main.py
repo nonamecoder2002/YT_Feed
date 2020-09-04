@@ -1,7 +1,5 @@
 import logging
 
-from datetime import datetime
-
 from telegram import (
     InlineKeyboardMarkup,
     InlineKeyboardButton
@@ -14,7 +12,10 @@ from telegram.ext import (
     CallbackQueryHandler
 )
 
-from TG.ptb_funcs import send_video
+from TG.ptb_funcs import (
+    send_video,
+    del_mes
+)
 
 from YT.yt_api import (
     fetch_uploads,
@@ -47,7 +48,14 @@ channel_pool = [
     {'channelId': 'UCq7JZ8ATgQWeu6sDM1czjhg', 'channelTitle': 'StopGame.Ru'},
     {'channelId': 'UCspfe9lef7ApJaHQsOcPC1A', 'channelTitle': 'overbafer1'},
     {'channelId': 'UCQWeDEwQruA_CcyR08bIE9g', 'channelTitle': 'iKakProsto2'},
-    {'channelId': 'UCEC4D0dTTJr_EEnEJz15hnQ', 'channelTitle': '24 Канал'},
+    {'channelId': 'UCY03gpyR__MuJtBpoSyIGnw', 'channelTitle': 'Droider.Ru'},
+    {'channelId': 'UCyoLK278J8j5e4MpMT5WOyg', 'channelTitle': 'Slava Gorbatenko'},
+    {'channelId': 'UC6uFoHcr_EEK6DgCS-LeTNA', 'channelTitle': 'PRO Hi-Tech'},
+    {'channelId': 'UCWVGUI2haKuZiJiInenVP6A', 'channelTitle': 'ВЄСТІ'},
+    {'channelId': 'UCrzwOa2lzzPjfiLIn7Y8SrQ', 'channelTitle': 'Кик Обзор'},
+    {'channelId': 'UCF_ZiWz2Vcq1o5u5i1TT3Kw', 'channelTitle': 'Телебачення Торонто'},
+    {'channelId': 'UCntek4Y39faSPt0SxzJkb9A', 'channelTitle': 'The King Drive'},
+
 
 ]
 
@@ -66,30 +74,34 @@ def vid_feed(context: CallbackContext):
         v_id = fetch_lat(channel_id=_channel['channelId'], keys=api_keys)
 
         if v_id not in uploads:
-            logger.info(f'Fetched Video: {v_id}')
-            send_video(context=context, v_id=v_id, markup=markup)
-            logger.info(f'Sent Video {v_id}')
 
-            uploads.append(v_id)
+            try:
+                logger.info(f'Fetched Video: {v_id}')
+                send_video(context=context, v_id=v_id, markup=markup)
+                logger.info(f'Sent Video {v_id}')
+                uploads.append(v_id)
+
+            except Exception as exp:
+
+                logger.exception(exp)
 
 
 def send_logs(update, context):
 
     if update.effective_user.id == 399835396:
+
         update.message.reply_document(
            open('logs.txt', 'rb')
         )
+        del_mes(_update=update, _context=context)
 
 
 def call_handler(update, context):
 
     call = update.callback_query
+
     if call.data == 'del':
-        mes_id = call.message.message_id
-        context.bot.delete_message(
-            chat_id=399835396,
-            message_id=mes_id
-        )
+        del_mes(_update=call, _context=context)
 
 
 def get_uploads(context: CallbackContext):
@@ -114,7 +126,7 @@ def main():
                       )
     job = updater.job_queue
 
-    job.run_daily(callback=get_uploads, time=datetime.now())
+    job.run_repeating(callback=get_uploads, interval=86400, first=0)
 
     job.run_repeating(callback=vid_feed, interval=180, first=0)
 
