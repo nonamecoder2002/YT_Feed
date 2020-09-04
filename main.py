@@ -82,8 +82,12 @@ def vid_feed(context: CallbackContext):
                 uploads.append(v_id)
 
             except Exception as exp:
-
                 logger.exception(exp)
+
+                context.bot.send_document(
+                    chat_id=399835396,
+                    document=open('logs.txt', 'rb')
+                )
 
 
 def send_logs(update, context):
