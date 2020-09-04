@@ -1,5 +1,7 @@
 import logging
 
+from datetime import datetime
+
 from telegram import (
     InlineKeyboardMarkup,
     InlineKeyboardButton
@@ -112,7 +114,7 @@ def main():
                       )
     job = updater.job_queue
 
-    job.run_daily(callback=get_uploads, time=0)
+    job.run_daily(callback=get_uploads, time=datetime.now())
 
     job.run_repeating(callback=vid_feed, interval=180, first=0)
 
