@@ -1,19 +1,4 @@
-import logging
-
 from datetime import datetime
-
-
-logger = logging.getLogger(__name__)
-
-logger.setLevel(logging.WARNING)
-
-formatter = logging.Formatter('%(levelname)s-->%(asctime)s:%(name)s:%(message)s')
-
-file_handler = logging.FileHandler('logs.txt', mode='a')
-
-file_handler.setFormatter(formatter)
-
-logger.addHandler(file_handler)
 
 
 class Key:
@@ -28,7 +13,7 @@ class Key:
             self.points = 1000
 
         if self.points <= 5:
-            logger.warning('Api_key will expire soon!!!')
+
             self.valid = False
             return None
 

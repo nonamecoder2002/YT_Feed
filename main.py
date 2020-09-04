@@ -1,7 +1,5 @@
 import logging
 
-from datetime import datetime
-
 from telegram import (
     InlineKeyboardMarkup,
     InlineKeyboardButton
@@ -53,19 +51,6 @@ channel_pool = [
 
 uploads = []
 
-clean_t = datetime(year=2020, month=12, day=12, hour=0, minute=0, second=0).time()
-
-
-for channel in channel_pool:
-
-    fetch_uploads(
-        channel_id=channel['channelId'],
-        keys=api_keys,
-        out=uploads
-    )
-
-logger.info(f'Fetched uploads: {uploads}')
-
 
 def vid_feed(context: CallbackContext):
 
@@ -105,10 +90,18 @@ def call_handler(update, context):
         )
 
 
-def clear_uploads(context: CallbackContext):
+def get_uploads(context: CallbackContext):
 
-    global uploads
+    global uploads, channel_pool
     uploads.clear()
+
+    for channel in channel_pool:
+
+        fetch_uploads(
+            channel_id=channel['channelId'],
+            keys=api_keys,
+            out=uploads
+        )
 
 
 def main():
@@ -119,9 +112,9 @@ def main():
                       )
     job = updater.job_queue
 
-    job.run_repeating(callback=vid_feed, interval=180, first=0)
+    job.run_daily(callback=get_uploads, time=0)
 
-    job.run_daily(callback=clear_uploads, time=clean_t)
+    job.run_repeating(callback=vid_feed, interval=180, first=0)
 
     _dispatcher = updater.dispatcher
 
