@@ -1,9 +1,6 @@
 import logging
 
-from telegram import (
-    InlineKeyboardMarkup,
-    InlineKeyboardButton
-)
+import os
 
 from telegram.ext import (
     Updater,
@@ -36,6 +33,8 @@ file_handler.setFormatter(formatter)
 
 logger.addHandler(file_handler)
 
+if not os.path.exists('./Temp'):
+    os.mkdir(path='./Temp')
 
 api_keys = [
     Key(value='AIzaSyBTZ9drxqXKkh8yijdYaBQS1ijANQQApZQ'),
@@ -66,10 +65,6 @@ def vid_feed(context: CallbackContext):
 
     global uploads
 
-    keyboard = [[InlineKeyboardButton(text='❌ Delete', callback_data='del')]]
-
-    markup = InlineKeyboardMarkup(keyboard)
-
     for _channel in channel_pool:
         v_id = fetch_lat(channel_id=_channel['channelId'], keys=api_keys)
 
@@ -77,7 +72,12 @@ def vid_feed(context: CallbackContext):
 
             try:
                 logger.info(f'Fetched Video: {v_id}')
-                send_video(context=context, v_id=v_id, markup=markup)
+                send_video(
+                    context=context,
+                    v_id=v_id,
+                    f_path_='./Temp/video.mp4',
+                    clip_path='./Temp/clip.mp4'
+                )
                 logger.info(f'Sent Video {v_id}')
                 uploads.append(v_id)
 
