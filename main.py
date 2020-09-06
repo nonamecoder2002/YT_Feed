@@ -76,7 +76,8 @@ def vid_feed(context: CallbackContext):
                     context=context,
                     v_id=v_id,
                     f_path_='./Temp/video.mp4',
-                    clip_path='./Temp/clip.mp4'
+                    clip_path='./Temp/clip.mp4',
+                    th_path='./Temp/thumb.jpg'
                 )
                 logger.info(f'Sent Video {v_id}')
                 uploads.append(v_id)
