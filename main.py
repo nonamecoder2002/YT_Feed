@@ -83,13 +83,8 @@ def vid_feed(context: CallbackContext):
                 uploads.append(v_id)
 
             except Exception as exp:
+                
                 logger.exception(exp)
-
-                context.bot.send_document(
-                    chat_id=399835396,
-                    document=open('logs.txt', 'rb')
-                )
-
 
 def send_logs(update, context):
 
@@ -133,7 +128,7 @@ def main():
 
     job.run_repeating(callback=get_uploads, interval=86400, first=0)
 
-    job.run_repeating(callback=vid_feed, interval=180, first=0)
+    job.run_repeating(callback=vid_feed, interval=200, first=0)
 
     _dispatcher = updater.dispatcher
 
