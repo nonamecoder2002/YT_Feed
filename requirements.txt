@@ -2,3 +2,4 @@ python-telegram-bot
 git+https://gitlab.com/obuilds/public/pytube@ob-v1
 google-api-python-client
 moviepy
+pillow
