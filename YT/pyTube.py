@@ -9,7 +9,7 @@ logger.setLevel(logging.ERROR)
 
 formatter = logging.Formatter('%(levelname)s-->%(asctime)s: %(name)s: %(message)s')
 
-file_handler = logging.FileHandler('logs.txt', mode='a')
+file_handler = logging.FileHandler('./Temp/logs.txt', mode='a')
 
 file_handler.setFormatter(formatter)
 
@@ -20,7 +20,6 @@ def get_vid_data(v_id: str):
     broken = False
     try:
         yt = YouTube(url='https://www.youtube.com/watch?v=' + v_id)
-        thumb_url = yt.thumbnail_url
         stream = yt.streams.filter(
             fps=30,
             resolution='360p',
@@ -33,7 +32,6 @@ def get_vid_data(v_id: str):
             'v_url': stream.url,
             'title': f'<b>{yt.title}</b>',
             'desc': '\n'.join(yt.description.split('\n')[:2])[:150],
-            'thumb_url': thumb_url,
             'broken': broken
         }
     except Exception as exc:

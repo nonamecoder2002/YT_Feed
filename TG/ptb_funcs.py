@@ -1,6 +1,6 @@
-import requests
+import logging
 
-import os
+import requests
 
 from moviepy.video.io.ffmpeg_tools import ffmpeg_extract_subclip
 
@@ -14,6 +14,17 @@ from telegram import (
 from YT.pyTube import (
     get_vid_data
 )
+logger = logging.getLogger(__name__)
+
+logger.setLevel(logging.ERROR)
+
+formatter = logging.Formatter('%(levelname)s-->%(asctime)s: %(name)s: %(message)s')
+
+file_handler = logging.FileHandler('./Temp/logs.txt', mode='a')
+
+file_handler.setFormatter(formatter)
+
+logger.addHandler(file_handler)
 
 
 def del_mes(_update, _context):
@@ -25,19 +36,34 @@ def del_mes(_update, _context):
     )
 
 
-def dl_thumb(file_path: str, f_url: str):
+def send_logs(update, context):
 
-    data = requests.get(f_url).content
+    if update.effective_user.id == 399835396:
 
-    with open(file_path, 'wb') as file:
+        update.message.reply_document(
+           open('./Temp/logs.txt', 'rb')
+        )
+        del_mes(_update=update, _context=context)
 
-        file.write(data)
 
-    img = Image.open(file_path)
+def call_handler(update, context):
 
-    img.thumbnail((320, 320))
+    call = update.callback_query
 
-    img.save(file_path)
+    if call.data == 'del':
+        del_mes(_update=call, _context=context)
+
+
+def mk_thumb(context):
+    blank = Image.new(
+        mode='1',
+        size=(1280, 720),
+        color=None
+    )
+    blank.thumbnail(
+        (320, 320)
+    )
+    blank.save(fp='./Temp/blank.jpg')
 
 
 def dl_vid(file_path: str, v_url: str):
@@ -53,29 +79,33 @@ def dl_vid(file_path: str, v_url: str):
             max_size = max_size - chunk_size
 
 
-def send_video(context, v_id: str, f_path_, clip_path, th_path: str):
-
-    keyboard = [[InlineKeyboardButton(text='❌ Delete', callback_data='del')]]
-    v_data = get_vid_data(v_id=v_id)
-    dl_vid(file_path=f_path_, v_url=v_data['v_url'])
-    ffmpeg_extract_subclip(filename=f_path_, t1=0, t2=700, targetname=clip_path)
-    os.remove(f_path_)
-    dl_thumb(f_url=v_data['thumb_url'], file_path=th_path)
-    caption = v_data['title'] + '\n\n' + v_data['desc']
-    if v_data['broken']:
-        keyboard.insert(
-            0,
-            [InlineKeyboardButton(text='📺 Watch Full', url=f'https://www.youtube.com/watch?v={v_id}&t={700}')]
+def send_video(context, v_id: str):
+    try:
+        f_path_ = './Temp/video.mp4'
+        clip_path = './Temp/clip.mp4'
+        keyboard = [[InlineKeyboardButton(text='❌ Delete', callback_data='del')]]
+        v_data = get_vid_data(v_id=v_id)
+        dl_vid(file_path=f_path_, v_url=v_data['v_url'])
+        ffmpeg_extract_subclip(filename=f_path_, t1=0, t2=700, targetname=clip_path)
+        os.remove(f_path_)
+        caption = v_data['title'] + '\n\n' + v_data['desc']
+        if v_data['broken']:
+            keyboard.insert(0,
+                            [InlineKeyboardButton(text='📺 Watch Full',
+                                                  url=f'https://www.youtube.com/watch?v={v_id}&t={700}')]
+                            )
+        markup = InlineKeyboardMarkup(keyboard)
+        context.bot.send_video(
+            timeout=30,
+            chat_id='399835396',
+            video=open(clip_path, 'rb'),
+            caption=caption,
+            supports_streaming=True,
+            parse_mode='HTML',
+            reply_markup=markup,
+            thumb=open('./Temp/blank.jpg', 'rb')
         )
-    markup = InlineKeyboardMarkup(keyboard)
-    context.bot.send_video(
-        chat_id='399835396',
-        video=open(clip_path, 'rb'),
-        caption=caption,
-        supports_streaming=True,
-        parse_mode='HTML',
-        reply_markup=markup,
-        thumb=open(th_path, 'rb')
-    )
-    os.remove(clip_path)
-    os.remove(th_path)
+        os.remove(clip_path)
+
+    except Exception as exp:
+        logger.exception(exp)

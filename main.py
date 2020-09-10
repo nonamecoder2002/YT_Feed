@@ -2,6 +2,11 @@ import logging
 
 import os
 
+if not os.path.exists('./Temp'):
+    os.mkdir('./Temp')
+else:
+    os.rmdir('./Temp')
+
 from telegram.ext import (
     Updater,
     CallbackContext,
@@ -11,7 +16,9 @@ from telegram.ext import (
 
 from TG.ptb_funcs import (
     send_video,
-    del_mes
+    mk_thumb,
+    send_logs,
+    call_handler
 )
 
 from YT.yt_api import (
@@ -27,14 +34,12 @@ logger.setLevel(logging.INFO)
 
 formatter = logging.Formatter('%(levelname)s-->%(asctime)s:%(name)s:%(message)s')
 
-file_handler = logging.FileHandler('logs.txt', mode='w')
+file_handler = logging.FileHandler('./Temp/logs.txt', mode='w')
 
 file_handler.setFormatter(formatter)
 
 logger.addHandler(file_handler)
 
-if not os.path.exists('./Temp'):
-    os.mkdir(path='./Temp')
 
 api_keys = [
     Key(value='AIzaSyBTZ9drxqXKkh8yijdYaBQS1ijANQQApZQ'),
@@ -54,6 +59,7 @@ channel_pool = [
     {'channelId': 'UCrzwOa2lzzPjfiLIn7Y8SrQ', 'channelTitle': 'Кик Обзор'},
     {'channelId': 'UCF_ZiWz2Vcq1o5u5i1TT3Kw', 'channelTitle': 'Телебачення Торонто'},
     {'channelId': 'UCntek4Y39faSPt0SxzJkb9A', 'channelTitle': 'The King Drive'},
+    {'channelId': 'UCIALMKvObZNtJ6AmdCLP7Lg', 'channelTitle': 'Bloomberg'}
 
 
 ]
@@ -72,36 +78,15 @@ def vid_feed(context: CallbackContext):
 
             try:
                 logger.info(f'Fetched Video: {v_id}')
-                send_video(
-                    context=context,
-                    v_id=v_id,
-                    f_path_='./Temp/video.mp4',
-                    clip_path='./Temp/clip.mp4',
-                    th_path='./Temp/thumb.jpg'
-                )
+
+                send_video(context=context, v_id=v_id)
+
                 logger.info(f'Sent Video {v_id}')
                 uploads.append(v_id)
 
             except Exception as exp:
-                
-                logger.exception(exp)
 
-def send_logs(update, context):
-
-    if update.effective_user.id == 399835396:
-
-        update.message.reply_document(
-           open('logs.txt', 'rb')
-        )
-        del_mes(_update=update, _context=context)
-
-
-def call_handler(update, context):
-
-    call = update.callback_query
-
-    if call.data == 'del':
-        del_mes(_update=call, _context=context)
+                pass
 
 
 def get_uploads(context: CallbackContext):
@@ -126,9 +111,11 @@ def main():
                       )
     job = updater.job_queue
 
-    job.run_repeating(callback=get_uploads, interval=86400, first=0)
+    job.run_once(callback=mk_thumb, when=0)
 
-    job.run_repeating(callback=vid_feed, interval=200, first=0)
+    job.run_repeating(callback=get_uploads, interval=86400, first=1)
+
+    job.run_repeating(callback=vid_feed, interval=200, first=2)
 
     _dispatcher = updater.dispatcher
 
