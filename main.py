@@ -6,6 +6,7 @@ if not os.path.exists('./Temp'):
     os.mkdir('./Temp')
 else:
     os.rmdir('./Temp')
+    os.mkdir('./Temp')
 
 from telegram.ext import (
     Updater,
