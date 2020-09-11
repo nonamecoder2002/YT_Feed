@@ -31,7 +31,7 @@ def del_mes(_update, _context):
 def send_logs(update, context):
     if update.effective_user.id == 399835396:
         update.message.reply_document(
-            open('./Temp/logs.txt', 'rb')
+            open('./logs.txt', 'rb')
         )
         del_mes(_update=update, _context=context)
 
