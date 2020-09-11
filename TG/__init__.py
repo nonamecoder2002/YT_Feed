@@ -1,17 +1,12 @@
 import logging
 
-import os, shutil
+import os
 
-if os.path.exists('./Temp'):
-    shutil.rmtree('./Temp')
-    os.mkdir('./Temp')
-
-else:
-
+if not os.path.exists('./Temp'):
     os.mkdir('./Temp')
 
 logging.basicConfig(
-    filename='./Temp/logs.txt',
+    filename='./logs.txt',
     level=logging.INFO,
     filemode='w',
     format='%(levelname)s-->%(asctime)s:|%(name)s|: %(message)s'

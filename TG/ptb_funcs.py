@@ -1,4 +1,4 @@
-import os
+import shutil
 
 import os
 
@@ -43,24 +43,25 @@ def call_handler(update, context):
         del_mes(_update=call, _context=context)
 
 
-def mk_thumb(context):
-    blank = Image.new(
-        mode='1',
-        size=(1280, 720),
-        color=None
-    )
-    blank.thumbnail(
-        (320, 320)
-    )
+def dl_thumb(url_):
 
-    blank.save(fp='./Temp/blank.jpg')
+    req = requests.get(url=url_)
+
+    with open('./Temp/thumb.jpg', 'wb') as f:
+        f.write(req.content)
+
+    thumb = Image.open('./Temp/thumb.jpg')
+
+    thumb.thumbnail((320, 320))
+
+    thumb.save('./Temp/thumb.jpg')
 
 
-def dl_vid(file_path: str, v_url: str):
+def dl_vid(v_url: str):
     max_size = 52000000
     chunk_size = 2000
     req = requests.get(url=v_url, stream=True)
-    with open(file_path, 'wb') as file:
+    with open('./Temp/video.mp4', 'wb') as file:
         for chunk in req.iter_content(chunk_size=chunk_size):
             if max_size - chunk_size >= 0:
                 file.write(chunk)
@@ -71,33 +72,32 @@ def dl_vid(file_path: str, v_url: str):
 
 def send_video(context, v_id: str):
     try:
-        f_path_ = './Temp/video.mp4'
-        clip_path = './Temp/clip.mp4'
-        keyboard = [[InlineKeyboardButton(text='❌ Delete', callback_data='del')]]
+        keyboard = [
+            [InlineKeyboardButton(text='📺 Watch Full', url=f'https://www.youtube.com/watch?v={v_id}&t={700}')],
+            [InlineKeyboardButton(text='❌ Delete', callback_data='del')]
+        ]
         v_data = get_vid_data(v_id=v_id)
         if not v_data:
             return False
-        dl_vid(file_path=f_path_, v_url=v_data['v_url'])
-        ffmpeg_extract_subclip(filename=f_path_, t1=0, t2=700, targetname=clip_path)
-        os.remove(f_path_)
+        dl_thumb(url_=v_data['t_url'])
+        dl_vid(v_url=v_data['v_url'])
+        ffmpeg_extract_subclip(filename='./Temp/video.mp4', t1=0, t2=700, targetname='./Temp/clip.mp4')
         caption = v_data['title'] + '\n\n' + v_data['desc']
-        if v_data['broken']:
-            keyboard.insert(0,
-                            [InlineKeyboardButton(text='📺 Watch Full',
-                                                  url=f'https://www.youtube.com/watch?v={v_id}&t={700}')]
-                            )
-        markup = InlineKeyboardMarkup(keyboard)
+        if not v_data['broken']:
+            keyboard.pop(0)
+
         context.bot.send_video(
             timeout=30,
             chat_id='399835396',
-            video=open(clip_path, 'rb'),
+            video=open('./Temp/clip.mp4', 'rb'),
             caption=caption,
             supports_streaming=True,
             parse_mode='HTML',
-            reply_markup=markup,
-            thumb=open('./Temp/blank.jpg', 'rb')
+            reply_markup=InlineKeyboardMarkup(keyboard),
+            thumb=open('./Temp/thumb.jpg', 'rb')
         )
-        os.remove(clip_path)
+        shutil.rmtree('./Temp')
+        os.mkdir('./Temp')
 
         return True
 

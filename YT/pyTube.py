@@ -18,8 +18,9 @@ def get_vid_data(v_id: str):
             broken = True
         return {
             'v_url': stream.url,
+            't_url': yt.thumbnail_url,
             'title': f'<b>{yt.title}</b>',
-            'desc': '\n'.join(yt.description.split('\n')[:2])[:150],
+            'desc': f'<code>{yt.description[:175]}</code>',
             'broken': broken
         }
     except Exception as exc:

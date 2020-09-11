@@ -9,7 +9,6 @@ from telegram.ext import (
 
 from TG.ptb_funcs import (
     send_video,
-    mk_thumb,
     send_logs,
     call_handler
 )
@@ -22,7 +21,7 @@ from YT.yt_api import (
 from YT.Classes import Key
 
 logging.basicConfig(
-    filename='./Temp/logs.txt',
+    filename='./logs.txt',
     level=logging.INFO,
     filemode='w',
     format='%(levelname)s-->%(asctime)s:|%(name)s|: %(message)s'
@@ -74,8 +73,8 @@ def vid_feed(context: CallbackContext):
                 logger.info(f'Sent Video {v_id}')
 
                 uploads.append(v_id)
-            else:
 
+            else:
                 pass
 
 
@@ -102,8 +101,6 @@ def main():
                       )
     job = updater.job_queue
 
-    job.run_once(callback=mk_thumb, when=0)
-
     job.run_repeating(callback=get_uploads, interval=86400, first=1)
 
     job.run_repeating(callback=vid_feed, interval=200, first=2)
@@ -113,6 +110,8 @@ def main():
     _dispatcher.add_handler(CommandHandler('logs', send_logs))
 
     _dispatcher.add_handler(CallbackQueryHandler(callback=call_handler))
+
+    logger.info('Bot is Up')
 
     updater.start_polling()
 
