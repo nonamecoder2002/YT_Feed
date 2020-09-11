@@ -2,11 +2,6 @@ import logging
 
 import os
 
-if not os.path.exists('./Temp'):
-    os.mkdir('./Temp')
-else:
-    os.rmdir('./Temp')
-
 from telegram.ext import (
     Updater,
     CallbackContext,
@@ -28,18 +23,15 @@ from YT.yt_api import (
 
 from YT.Classes import Key
 
+logging.basicConfig(
+    filename='./Temp/logs.txt',
+    level=logging.INFO,
+    filemode='w',
+    format='%(levelname)s-->%(asctime)s:|%(name)s|: %(message)s'
+
+)
+
 logger = logging.getLogger(__name__)
-
-logger.setLevel(logging.INFO)
-
-formatter = logging.Formatter('%(levelname)s-->%(asctime)s:%(name)s:%(message)s')
-
-file_handler = logging.FileHandler('./Temp/logs.txt', mode='w')
-
-file_handler.setFormatter(formatter)
-
-logger.addHandler(file_handler)
-
 
 api_keys = [
     Key(value='AIzaSyBTZ9drxqXKkh8yijdYaBQS1ijANQQApZQ'),
@@ -72,19 +64,19 @@ def vid_feed(context: CallbackContext):
     global uploads
 
     for _channel in channel_pool:
+
         v_id = fetch_lat(channel_id=_channel['channelId'], keys=api_keys)
 
         if v_id not in uploads:
 
-            try:
-                logger.info(f'Fetched Video: {v_id}')
+            logger.info(f'Fetched Video: {v_id}')
 
-                send_video(context=context, v_id=v_id)
+            if send_video(context=context, v_id=v_id):
 
                 logger.info(f'Sent Video {v_id}')
-                uploads.append(v_id)
 
-            except Exception as exp:
+                uploads.append(v_id)
+            else:
 
                 pass
 
@@ -92,6 +84,7 @@ def vid_feed(context: CallbackContext):
 def get_uploads(context: CallbackContext):
 
     global uploads, channel_pool
+
     uploads.clear()
 
     for channel in channel_pool:
@@ -124,8 +117,6 @@ def main():
     _dispatcher.add_handler(CallbackQueryHandler(callback=call_handler))
 
     updater.start_polling()
-
-    logger.info('Bot is up')
 
     updater.idle()
 

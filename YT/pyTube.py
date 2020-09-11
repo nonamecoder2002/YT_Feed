@@ -1,19 +1,7 @@
-import logging
 
 from pytube import YouTube
 
-
-logger = logging.getLogger(__name__)
-
-logger.setLevel(logging.ERROR)
-
-formatter = logging.Formatter('%(levelname)s-->%(asctime)s: %(name)s: %(message)s')
-
-file_handler = logging.FileHandler('./Temp/logs.txt', mode='a')
-
-file_handler.setFormatter(formatter)
-
-logger.addHandler(file_handler)
+from YT import logger
 
 
 def get_vid_data(v_id: str):
@@ -35,4 +23,7 @@ def get_vid_data(v_id: str):
             'broken': broken
         }
     except Exception as exc:
+
         logger.exception(exc)
+
+        return False

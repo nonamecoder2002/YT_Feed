@@ -5,7 +5,7 @@ def build_service(keys: list):
     for key in keys:
         if key.is_valid():
             key.use()
-            return build(serviceName='youtube', version='v3', developerKey=key.key_value)
+            return build(serviceName='youtube', version='v3', developerKey=key.key_value, cache_discovery=False)
 
 
 def get_playlist(_channel_id: str, _keys: list):

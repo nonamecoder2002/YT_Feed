@@ -1,4 +1,4 @@
 venv/
 .idea/
 test_bot.py
-test.py
+Test/test.py

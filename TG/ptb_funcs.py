@@ -1,4 +1,4 @@
-import logging
+import os
 
 import requests
 
@@ -14,17 +14,7 @@ from telegram import (
 from YT.pyTube import (
     get_vid_data
 )
-logger = logging.getLogger(__name__)
-
-logger.setLevel(logging.ERROR)
-
-formatter = logging.Formatter('%(levelname)s-->%(asctime)s: %(name)s: %(message)s')
-
-file_handler = logging.FileHandler('./Temp/logs.txt', mode='a')
-
-file_handler.setFormatter(formatter)
-
-logger.addHandler(file_handler)
+from TG import logger
 
 
 def del_mes(_update, _context):
@@ -37,17 +27,14 @@ def del_mes(_update, _context):
 
 
 def send_logs(update, context):
-
     if update.effective_user.id == 399835396:
-
         update.message.reply_document(
-           open('./Temp/logs.txt', 'rb')
+            open('./Temp/logs.txt', 'rb')
         )
         del_mes(_update=update, _context=context)
 
 
 def call_handler(update, context):
-
     call = update.callback_query
 
     if call.data == 'del':
@@ -63,6 +50,7 @@ def mk_thumb(context):
     blank.thumbnail(
         (320, 320)
     )
+
     blank.save(fp='./Temp/blank.jpg')
 
 
@@ -85,6 +73,8 @@ def send_video(context, v_id: str):
         clip_path = './Temp/clip.mp4'
         keyboard = [[InlineKeyboardButton(text='❌ Delete', callback_data='del')]]
         v_data = get_vid_data(v_id=v_id)
+        if not v_data:
+            return False
         dl_vid(file_path=f_path_, v_url=v_data['v_url'])
         ffmpeg_extract_subclip(filename=f_path_, t1=0, t2=700, targetname=clip_path)
         os.remove(f_path_)
@@ -107,5 +97,10 @@ def send_video(context, v_id: str):
         )
         os.remove(clip_path)
 
+        return True
+
     except Exception as exp:
+
         logger.exception(exp)
+
+        return False
