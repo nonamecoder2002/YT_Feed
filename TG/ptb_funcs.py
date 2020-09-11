@@ -1,5 +1,7 @@
 import shutil
 
+import os
+
 import requests
 
 from moviepy.video.io.ffmpeg_tools import ffmpeg_extract_subclip
