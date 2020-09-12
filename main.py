@@ -118,6 +118,7 @@ def main():
     logger.info('Bot is Up')
 
     updater.start_webhook(
+        listen="0.0.0.0",
         port=port,
         url_path=token
     )
