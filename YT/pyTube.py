@@ -14,7 +14,7 @@ def get_vid_data(v_id: str):
             mime_type='video/mp4',
             progressive=True
         ).first()
-        if yt.length > 700:
+        if yt.length > 600:
             broken = True
         return {
             'v_url': stream.url,

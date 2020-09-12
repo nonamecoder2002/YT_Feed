@@ -76,7 +76,7 @@ def dl_vid(v_url: str):
 def send_video(context, v_id: str):
     try:
         keyboard = [
-            [InlineKeyboardButton(text='📺 Watch Full', url=f'https://www.youtube.com/watch?v={v_id}&t={700}')],
+            [InlineKeyboardButton(text='📺 Watch Full', url=f'https://www.youtube.com/watch?v={v_id}&t={600}')],
             [InlineKeyboardButton(text='❌ Delete', callback_data='del')]
         ]
         v_data = get_vid_data(v_id=v_id)
@@ -84,7 +84,7 @@ def send_video(context, v_id: str):
             return False
         dl_thumb(url_=v_data['t_url'])
         dl_vid(v_url=v_data['v_url'])
-        ffmpeg_extract_subclip(filename='./Temp/video.mp4', t1=0, t2=700, targetname='./Temp/clip.mp4')
+        ffmpeg_extract_subclip(filename='./Temp/video.mp4', t1=0, t2=600, targetname='./Temp/clip.mp4')
         caption = v_data['title'] + '\n\n' + v_data['desc']
         if not v_data['broken']:
             keyboard.pop(0)
