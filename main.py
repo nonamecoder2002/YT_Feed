@@ -1,5 +1,7 @@
 import logging
 
+import os
+
 from telegram.ext import (
     Updater,
     CallbackContext,
@@ -47,10 +49,7 @@ channel_pool = [
     {'channelId': 'UCWVGUI2haKuZiJiInenVP6A', 'channelTitle': 'ВЄСТІ'},
     {'channelId': 'UCrzwOa2lzzPjfiLIn7Y8SrQ', 'channelTitle': 'Кик Обзор'},
     {'channelId': 'UCF_ZiWz2Vcq1o5u5i1TT3Kw', 'channelTitle': 'Телебачення Торонто'},
-    {'channelId': 'UCntek4Y39faSPt0SxzJkb9A', 'channelTitle': 'The King Drive'},
-    {'channelId': 'UCIALMKvObZNtJ6AmdCLP7Lg', 'channelTitle': 'Bloomberg'}
-
-
+    {'channelId': 'UCntek4Y39faSPt0SxzJkb9A', 'channelTitle': 'The King Drive'}
 ]
 
 uploads = []
@@ -62,7 +61,7 @@ def vid_feed(context: CallbackContext):
 
     for _channel in channel_pool:
 
-        v_id = fetch_lat(channel_id=_channel['channelId'], keys=api_keys)
+        v_id = fetch_lat(channel_id=_channel['channelId'], keys_=api_keys)
 
         if v_id not in uploads:
 
@@ -95,10 +94,15 @@ def get_uploads(context: CallbackContext):
 
 def main():
 
+    token = '1254645903:AAGK9Lud_wRONgINQMm6xgeroQmA89zSC5I'
+
+    port = int(os.environ.get('PORT', '8443'))
+
     updater = Updater(
         token='1254645903:AAGK9Lud_wRONgINQMm6xgeroQmA89zSC5I',
         use_context=True
                       )
+
     job = updater.job_queue
 
     job.run_repeating(callback=get_uploads, interval=86400, first=1)
@@ -113,7 +117,12 @@ def main():
 
     logger.info('Bot is Up')
 
-    updater.start_polling()
+    updater.start_webhook(
+        port=port,
+        url_path=token
+    )
+
+    updater.bot.set_webhook('https://sheltered-gorge-34910.herokuapp.com/' + token)
 
     updater.idle()
 
