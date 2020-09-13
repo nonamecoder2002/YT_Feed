@@ -28,24 +28,6 @@ def del_mes(_update, _context):
     )
 
 
-def send_logs(update, context):
-    if update.effective_user.id == 399835396:
-        keyboard = [[InlineKeyboardButton(text='❌ Delete', callback_data='del')]]
-        context.bot.send_document(
-            chat_id=update.effective_user.id,
-            document=open('./logs.txt', 'rb'),
-            reply_markup=InlineKeyboardMarkup(keyboard)
-        )
-        del_mes(_update=update, _context=context)
-
-
-def call_handler(update, context):
-    call = update.callback_query
-
-    if call.data == 'del':
-        del_mes(_update=call, _context=context)
-
-
 def dl_thumb(url_):
 
     req = requests.get(url=url_)
@@ -74,6 +56,9 @@ def dl_vid(v_url: str):
 
 
 def send_video(context, v_id: str):
+    f_path = './Temp/video.mp4'
+    t_path = './Temp/thumb.jpg'
+    cl_path = './Temp/clip.mp4'
     try:
         keyboard = [
             [InlineKeyboardButton(text='📺 Watch Full', url=f'https://www.youtube.com/watch?v={v_id}&t={600}')],
@@ -84,7 +69,7 @@ def send_video(context, v_id: str):
             return False
         dl_thumb(url_=v_data['t_url'])
         dl_vid(v_url=v_data['v_url'])
-        ffmpeg_extract_subclip(filename='./Temp/video.mp4', t1=0, t2=600, targetname='./Temp/clip.mp4')
+        ffmpeg_extract_subclip(filename=f_path, t1=0, t2=600, targetname=cl_path)
         caption = v_data['title'] + '\n\n' + v_data['desc']
         if not v_data['broken']:
             keyboard.pop(0)
@@ -92,12 +77,12 @@ def send_video(context, v_id: str):
         context.bot.send_video(
             timeout=30,
             chat_id='399835396',
-            video=open('./Temp/clip.mp4', 'rb'),
+            video=open(cl_path, 'rb'),
             caption=caption,
             supports_streaming=True,
             parse_mode='HTML',
             reply_markup=InlineKeyboardMarkup(keyboard),
-            thumb=open('./Temp/thumb.jpg', 'rb')
+            thumb=open(t_path, 'rb')
         )
         shutil.rmtree('./Temp')
         os.mkdir('./Temp')
