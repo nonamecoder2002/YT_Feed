@@ -1,4 +1,4 @@
 venv/
 .idea/
-test_bot.py
-ToDo
+TG/__pycache__/
+YT/__pycache__/
