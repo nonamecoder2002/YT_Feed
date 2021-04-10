@@ -19,7 +19,7 @@ from TG.ptb_jobs import (
 def main():
 
     updater = Updater(
-        token='1254645903:AAGK9Lud_wRONgINQMm6xgeroQmA89zSC5I',
+        token='BOT_TOKEN',
         use_context=True
                       )
 
